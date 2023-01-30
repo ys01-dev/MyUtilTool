@@ -52,30 +52,24 @@ class Common {
         return retStr
     }
 
-    fun writeFile(context: Context, str: String?, uri: Uri?): Pair<Boolean, String> {
-        var err = false
-        var retStr = ""
-
-        this.getFilename(context, uri).let {
-            err = it == null
-            if(!err && it!!.startsWith("(invalid")) {
-                err = true
-                retStr = "unnamed file was saved as \"invalid\""
-            }
-        }
-
-        if(!err) {
-            BufferedWriter(OutputStreamWriter(context.contentResolver.openOutputStream(uri!!))).use {
-                retStr = try {
-                    it.write(str)
-                    "saved"
-                } catch (e: Exception) {
-                    err = true
-                    e.message.toString()
+    fun writeFile(context: Context, str: String?, uri: Uri?) {
+        try {
+            this.getFilename(context, uri).let {
+                if (it != null && it.startsWith("(invalid")) {
+                    throw Exception("unnamed file was saved as \"invalid\"")
                 }
             }
+        } catch(e: Exception) {
+            throw Exception(e.message)
         }
-        return Pair(!err, retStr)
+
+        BufferedWriter(OutputStreamWriter(context.contentResolver.openOutputStream(uri!!))).use {
+            try {
+                it.write(str)
+            } catch (e: Exception) {
+                throw Exception(e.message)
+            }
+        }
     }
 
     fun getFileExt(fileName: String?): String? {

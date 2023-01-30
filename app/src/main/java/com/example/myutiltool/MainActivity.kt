@@ -49,12 +49,13 @@ class MainActivity : AppCompatActivity() {
                 common.browse(this, common.FLAG_READFILE)
             }
             R.id.menu_action_overwrite -> {
-                var str: String = try {
-                    common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), FileInfo.selectedFile).second
-                } catch (e: Exception) {
-                    e.message ?: "an exception has been thrown"
+                if(FileInfo.selectedFile != null){
+                    try {
+                        common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), FileInfo.selectedFile)
+                    } catch (e: Exception) {
+                        Snackbar.make(findViewById(R.id.EditText1), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+                    }
                 }
-                Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
             }
             else -> {}
         }
@@ -66,21 +67,20 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 common.FLAG_READFILE -> {
-                    var notifyStr = ""
-
                     FileInfo.selectedFile = data?.data
                     FileInfo.selectedFileName = common.getFilename(this, data?.data)
-                    notifyStr = common.getFileExt(FileInfo.selectedFileName)?.let {
-                        try{
-                            common.readFile(this, data?.data)
-                        }catch (e: Exception){
-                            e.message
-                        }
-                    }?: "app couldn't get file name"
-                    Snackbar.make(findViewById(R.id.EditText1), notifyStr, BaseTransientBottomBar.LENGTH_SHORT).show()
+                    try {
+                        common.readFile(this, data?.data)
+                    } catch (e: Exception) {
+                        Snackbar.make(findViewById(R.id.EditText1), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+                    }
                 }
                 common.FLAG_WRITEFILE -> {
-                    common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
+                    try {
+                        common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
+                    } catch (e: Exception) {
+                        Snackbar.make(findViewById(R.id.EditText1), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+                    }
                 }
                 else -> {}
             }
