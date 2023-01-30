@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/memo">
+
+    <fragment
+        android:id="@+id/memo"
+        android:name="com.example.myutiltool.ui.memo.Memo"
+        android:label="fragment_memo"
+        tools:layout="@layout/fragment_memo" >
+    </fragment>
+    <fragment
+        android:id="@+id/zip"
+        android:name="com.example.myutiltool.ui.zip.Zip"
+        android:label="fragment_zip"
+        tools:layout="@layout/fragment_zip" >
+    </fragment>
+</navigation>
