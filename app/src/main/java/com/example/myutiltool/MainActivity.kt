@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         NavigationUI.setupActionBarWithNavController(this, navController, findViewById(R.id.drawerLayout))
         _binding.navView.setupWithNavController(navController)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        //supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -50,11 +50,13 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.menu_action_overwrite -> {
                 if(FileInfo.selectedFile != null){
-                    try {
+                    var str = try {
                         common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), FileInfo.selectedFile)
+                        "overwritten ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
-                        Snackbar.make(findViewById(R.id.EditText1), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+                        e.message.toString()
                     }
+                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
             }
             else -> {}
@@ -69,18 +71,22 @@ class MainActivity : AppCompatActivity() {
                 common.FLAG_READFILE -> {
                     FileInfo.selectedFile = data?.data
                     FileInfo.selectedFileName = common.getFilename(this, data?.data)
-                    try {
-                        common.readFile(this, data?.data)
+                    var str = try {
+                        findViewById<EditText>(R.id.EditText1).setText(common.readFile(this, data?.data))
+                        "opend ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
-                        Snackbar.make(findViewById(R.id.EditText1), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+                        e.message.toString()
                     }
+                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 common.FLAG_WRITEFILE -> {
-                    try {
+                    var str = try {
                         common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
+                        "saved as ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
-                        Snackbar.make(findViewById(R.id.EditText1), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+                        e.message.toString()
                     }
+                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 else -> {}
             }
