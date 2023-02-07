@@ -57,6 +57,8 @@ class MainActivity : AppCompatActivity() {
                         e.message.toString()
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(findViewById(R.id.EditText1), "any file hasn't been opened yet", BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
             }
             else -> {}
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                     FileInfo.selectedFileName = common.getFilename(this, data?.data)
                     var str = try {
                         findViewById<EditText>(R.id.EditText1).setText(common.readFile(this, data?.data))
-                        "opend ${FileInfo.selectedFileName}"
+                        "opened ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                 common.FLAG_WRITEFILE -> {
                     var str = try {
                         common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
-                        "saved as ${FileInfo.selectedFileName}"
+                        "file saved as ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }

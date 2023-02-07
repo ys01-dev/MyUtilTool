@@ -7,10 +7,20 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.net.toFile
+import kotlinx.coroutines.flow.asFlow
+import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.net.URI
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 class Common {
     val FLAG_READFILE = 1
@@ -90,5 +100,41 @@ class Common {
             throw Exception(e.message)
         }
         return filename
+    }
+
+    fun compressToZip(uri: Uri) {
+        try {
+            ZipOutputStream(FileOutputStream(uri.toFile())).use {
+
+            }
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
+    }
+
+    fun unZip(uri: Uri) {
+        try {
+            ZipInputStream(FileInputStream(uri.toFile())).use {zis ->
+                var len = 0
+                var buff = ByteArray(1024)
+
+                while(true) {
+                    val ze = zis.nextEntry ?: break
+                    val unZipFile = File(ze.name)
+
+                    if(unZipFile.isDirectory){
+                        unZipFile.mkdirs()
+                    } else {
+                        BufferedOutputStream(FileOutputStream(unZipFile)).use {bos ->
+                            while(run {len = zis.read(buff); len} != -1) {
+                                bos.write(buff, 0, len)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch(e: Exception) {
+            throw Exception(e.message)
+        }
     }
 }
