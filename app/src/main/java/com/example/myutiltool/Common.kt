@@ -1,14 +1,10 @@
 package com.example.myutiltool
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.net.toFile
-import kotlinx.coroutines.flow.asFlow
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -17,36 +13,13 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
-import java.net.URI
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 class Common {
     val FLAG_READFILE = 1
     val FLAG_WRITEFILE = 2
-
-    fun browse(activity: Activity, mode: Int) {
-        var intent: Intent? = null
-
-        when(mode) {
-            this.FLAG_READFILE -> {
-                intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = "*/*"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                }
-            }
-            this.FLAG_WRITEFILE -> {
-                intent =  Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    type = "*/*"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    putExtra(Intent.EXTRA_TITLE, FileInfo.selectedFileName ?: "newText.txt")
-                }
-            }
-            else -> {}
-        }
-        if(intent != null) startActivityForResult(activity, intent, mode, null)
-    }
+    val FLAG_UNZIP = 4
 
     fun readFile(context: Context, uri: Uri?): String? {
         var retStr: String? = null

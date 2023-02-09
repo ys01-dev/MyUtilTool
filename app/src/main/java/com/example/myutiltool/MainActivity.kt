@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
@@ -43,10 +44,10 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_action_save -> {
-                common.browse(this, common.FLAG_WRITEFILE)
+                this.browse(common.FLAG_WRITEFILE)
             }
             R.id.menu_action_open -> {
-                common.browse(this, common.FLAG_READFILE)
+                this.browse(common.FLAG_READFILE)
             }
             R.id.menu_action_overwrite -> {
                 if(FileInfo.selectedFile != null){
@@ -90,8 +91,41 @@ class MainActivity : AppCompatActivity() {
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
+                common.FLAG_UNZIP -> {
+                    FileInfo.selectedFile = data?.data
+                    FileInfo.selectedFileName = common.getFilename(this, data?.data)
+                }
                 else -> {}
             }
         }
+    }
+
+    fun browse(mode: Int) {
+        var intent: Intent? = null
+
+        when(mode) {
+            common.FLAG_READFILE -> {
+                intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    type = "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+            }
+            common.FLAG_WRITEFILE -> {
+                intent =  Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    type = "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    putExtra(Intent.EXTRA_TITLE, FileInfo.selectedFileName ?: "newText.txt")
+                }
+            }
+            common.FLAG_UNZIP -> {
+                intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    type = "application/zip"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    //putExtra(Intent.EXTRA_MIME_TYPES, "application/zip")
+                }
+            }
+            else -> {}
+        }
+        if(intent != null) startActivityForResult(intent, mode, null)
     }
 }
