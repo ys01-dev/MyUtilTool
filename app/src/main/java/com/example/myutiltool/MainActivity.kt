@@ -17,10 +17,11 @@ import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var _binding: ActivityMainBinding
-    private val common: Common = Common()
+    private lateinit var _common: Common
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        _common = Common()
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
 
@@ -44,15 +45,15 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_action_save -> {
-                this.browse(common.FLAG_WRITEFILE)
+                this.browse(_common.FLAG_WRITEFILE)
             }
             R.id.menu_action_open -> {
-                this.browse(common.FLAG_READFILE)
+                this.browse(_common.FLAG_READFILE)
             }
             R.id.menu_action_overwrite -> {
                 if(FileInfo.selectedFile != null){
                     var str = try {
-                        common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), FileInfo.selectedFile)
+                        _common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), FileInfo.selectedFile)
                         "overwritten ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
@@ -68,56 +69,57 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
-                common.FLAG_READFILE -> {
+                _common.FLAG_READFILE -> {
                     FileInfo.selectedFile = data?.data
-                    FileInfo.selectedFileName = common.getFilename(this, data?.data)
+                    FileInfo.selectedFileName = _common.getFilename(this, data?.data)
                     var str = try {
-                        findViewById<EditText>(R.id.EditText1).setText(common.readFile(this, data?.data))
+                        findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, data?.data))
                         "opened ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
-                common.FLAG_WRITEFILE -> {
+                _common.FLAG_WRITEFILE -> {
                     var str = try {
-                        common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
+                        _common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
                         "file saved as ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
-                common.FLAG_UNZIP -> {
+                _common.FLAG_UNZIP -> {
                     FileInfo.selectedFile = data?.data
-                    FileInfo.selectedFileName = common.getFilename(this, data?.data)
+                    FileInfo.selectedFileName = _common.getFilename(this, data?.data)
                 }
-                else -> {}
+                else -> {
+                    super.onActivityResult(requestCode, resultCode, data)
+                }
             }
         }
     }
 
-    fun browse(mode: Int) {
+     fun browse(mode: Int) {
         var intent: Intent? = null
 
         when(mode) {
-            common.FLAG_READFILE -> {
+            _common.FLAG_READFILE -> {
                 intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     type = "*/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                 }
             }
-            common.FLAG_WRITEFILE -> {
+            _common.FLAG_WRITEFILE -> {
                 intent =  Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     type = "*/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_TITLE, FileInfo.selectedFileName ?: "newText.txt")
                 }
             }
-            common.FLAG_UNZIP -> {
+            _common.FLAG_UNZIP -> {
                 intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     type = "application/zip"
                     addCategory(Intent.CATEGORY_OPENABLE)
