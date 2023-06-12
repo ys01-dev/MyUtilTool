@@ -1,13 +1,19 @@
 package com.example.myutiltool
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
@@ -24,6 +30,13 @@ class MainActivity : AppCompatActivity() {
         _common = Common()
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+        } else {
+            //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+            //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
+            this.startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+        }
 
         val navController = findNavController(R.id.nav_host_fragment_container)
 
@@ -100,6 +113,21 @@ class MainActivity : AppCompatActivity() {
                     super.onActivityResult(requestCode, resultCode, data)
                 }
             }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when(requestCode) {
+            _common.REQUEST_CODE_EXSTORAGE -> {
+                if(grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
+
+                } else {
+                    Snackbar.make(findViewById(R.id.EditText1), "permission of ex-storage didn't granted", BaseTransientBottomBar.LENGTH_SHORT).show()
+                }
+            }
+            else -> {}
         }
     }
 

@@ -20,8 +20,10 @@ import java.util.zip.ZipOutputStream
 class Common {
     val FLAG_READFILE = 1
     val FLAG_WRITEFILE = 2
-    val FLAG_UNZIP = 4
-    val FLAG_SELECTZIP = 8
+    val FLAG_UNZIP = 3
+    val FLAG_SELECTZIP = 4
+
+    val REQUEST_CODE_EXSTORAGE = 101
 
     fun readFile(context: Context, uri: Uri?): String? {
         var retStr: String? = null

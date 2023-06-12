@@ -1,11 +1,16 @@
 package com.example.myutiltool.ui.zip
 
+import android.Manifest
+import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myutiltool.Common
@@ -14,6 +19,7 @@ import com.example.myutiltool.MainActivity
 import com.example.myutiltool.R
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import java.lang.Exception
 
 class Zip : Fragment() {
     private lateinit var _common: Common
@@ -45,11 +51,14 @@ class Zip : Fragment() {
 
         view.findViewById<Button>(R.id.btn_unzip)?.setOnClickListener {
             if (_common.getFileExt(FileInfo.selectedFileName) == ".zip") {
-                _common.unZip(_main, FileInfo.selectedFile!!)
+                try {
+                    _common.unZip(_main, FileInfo.selectedFile!!)
+                } catch(e: Exception) {
+                    Snackbar.make(_main.findViewById(R.id.btn_unzip),"failed to open ZIP file", BaseTransientBottomBar.LENGTH_SHORT).show()
+                }
             } else {
                 Snackbar.make(_main.findViewById(R.id.btn_unzip),"you must select a zip file", BaseTransientBottomBar.LENGTH_SHORT).show()
             }
         }
     }
-
 }
