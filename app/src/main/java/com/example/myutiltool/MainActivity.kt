@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             when (requestCode) {
                 _common.FLAG_READFILE -> {
                     FileInfo.selectedFile = data?.data
-                    FileInfo.selectedFileName = _common.getFilename(this, data?.data)
+                    FileInfo.selectedFileName = _common.getFileName(this, data?.data)
                     var str = try {
                         findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, data?.data))
                         "opened ${FileInfo.selectedFileName}"
@@ -91,9 +91,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
-                _common.FLAG_UNZIP -> {
+                _common.FLAG_SELECTZIP -> {
                     FileInfo.selectedFile = data?.data
-                    FileInfo.selectedFileName = _common.getFilename(this, data?.data)
+                    FileInfo.selectedFileName = _common.getFileName(this, data?.data)
+                    findViewById<TextView>(R.id.zipName).text = FileInfo.selectedFileName
                 }
                 else -> {
                     super.onActivityResult(requestCode, resultCode, data)
@@ -106,9 +107,10 @@ class MainActivity : AppCompatActivity() {
         var intent: Intent? = null
 
         when(mode) {
-            _common.FLAG_READFILE -> {
+            _common.FLAG_READFILE,
+            _common.FLAG_SELECTZIP -> {
                 intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = "*/*"
+                    type = if(mode == _common.FLAG_SELECTZIP) "application/zip" else "*/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                 }
             }
@@ -117,13 +119,6 @@ class MainActivity : AppCompatActivity() {
                     type = "*/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_TITLE, FileInfo.selectedFileName ?: "newText.txt")
-                }
-            }
-            _common.FLAG_UNZIP -> {
-                intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = "application/zip"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    //putExtra(Intent.EXTRA_MIME_TYPES, "application/zip")
                 }
             }
             else -> {}

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myutiltool.Common
@@ -13,9 +14,6 @@ import com.example.myutiltool.MainActivity
 import com.example.myutiltool.R
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 
 class Zip : Fragment() {
     private lateinit var _common: Common
@@ -40,12 +38,14 @@ class Zip : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<Button>(R.id.btn_unzip)?.setOnClickListener {
-            //FileInfo.selectedFileName = null
-            _main.browse(_common.FLAG_UNZIP)
 
+        view.findViewById<Button>(R.id.btn_selectZip)?.setOnClickListener {
+            _main.browse(_common.FLAG_SELECTZIP)
+        }
+
+        view.findViewById<Button>(R.id.btn_unzip)?.setOnClickListener {
             if (_common.getFileExt(FileInfo.selectedFileName) == ".zip") {
-                _common.unZip(FileInfo.selectedFile!!)
+                _common.unZip(_main, FileInfo.selectedFile!!)
             } else {
                 Snackbar.make(_main.findViewById(R.id.btn_unzip),"you must select a zip file", BaseTransientBottomBar.LENGTH_SHORT).show()
             }
