@@ -18,6 +18,8 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.example.myutiltool.databinding.ActivityMainBinding
+import com.example.myutiltool.ui.PermissionDialog
+import com.example.myutiltool.ui.SimpleDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
@@ -37,6 +39,9 @@ class MainActivity : AppCompatActivity() {
             //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
             this.startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
         }
+
+        //PermissionDialog("1","2", ).show(supportFragmentManager,"")
+        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
 
         val navController = findNavController(R.id.nav_host_fragment_container)
 

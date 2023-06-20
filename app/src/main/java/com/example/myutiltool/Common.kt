@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.annotation.NonNull
 import androidx.core.net.toFile
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
@@ -40,22 +41,14 @@ class Common {
     }
 
     fun writeFile(context: Context, str: String?, uri: Uri?) {
-        try {
-            this.getFileName(context, uri).let {
-                if (it != null && it.startsWith("(invalid")) {
-                    throw Exception("unnamed file was saved as \"invalid\"")
-                }
-            }
-        } catch(e: Exception) {
-            throw Exception(e.message)
-        }
+        FileInfo.selectedFileName = this.getFileName(context, uri)
 
-        BufferedWriter(OutputStreamWriter(context.contentResolver.openOutputStream(uri!!))).use {
-            try {
+        try {
+            BufferedWriter(OutputStreamWriter(context.contentResolver.openOutputStream(uri!!))).use {
                 it.write(str)
-            } catch (e: Exception) {
-                throw Exception(e.message)
             }
+        } catch (e: Exception) {
+            throw Exception(e.message)
         }
     }
 
@@ -68,7 +61,7 @@ class Common {
         var filename: String? = null
 
         try {
-            context.contentResolver.query(uri!!, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null, null)?.use {
+            context.contentResolver.query(uri!!, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.DOCUMENT_ID), null, null, null)?.use {
                 if (it.moveToFirst()) {
                     filename = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))
                 }
