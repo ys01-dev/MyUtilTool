@@ -5,21 +5,19 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.example.myutiltool.databinding.ActivityMainBinding
-import com.example.myutiltool.ui.PermissionDialog
-import com.example.myutiltool.ui.SimpleDialog
+import com.example.myutiltool.ui.StoragePermissionDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
@@ -33,15 +31,13 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-        } else {
-            //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-            //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
-            this.startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+        if(!Environment.isExternalStorageManager()){
+            StoragePermissionDialog("storage permission required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(supportFragmentManager,"main")
         }
 
-        //PermissionDialog("1","2", ).show(supportFragmentManager,"")
-        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
+        //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
+        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
 
         val navController = findNavController(R.id.nav_host_fragment_container)
 

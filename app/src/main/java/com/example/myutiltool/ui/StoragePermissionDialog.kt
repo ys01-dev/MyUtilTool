@@ -7,7 +7,7 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 
-class PermissionDialog constructor(title: String, message: String, permission: String, buttons: Array<String> = arrayOf("OK", "CANCEL")): DialogFragment() {
+class StoragePermissionDialog constructor(title: String, message: String, permission: String, buttons: Array<String> = arrayOf("OK", "CANCEL")): DialogFragment() {
     private var _title = title
     private var _message = message
     private var _buttons = buttons
@@ -23,14 +23,8 @@ class PermissionDialog constructor(title: String, message: String, permission: S
                 _selectedButton = 0
             }
             .setNegativeButton(_buttons[1]) { dialog, id ->
-                //SimpleDialog("notice", "storage permission is required").show(activity.getSupportFragmentManager(), "")
                 _selectedButton = 1
             }
         return builder.create()
-    }
-
-    fun showWithResult(manager: FragmentManager, tag: String?): Int? {
-        super.show(manager, tag)
-        return _selectedButton
     }
 }

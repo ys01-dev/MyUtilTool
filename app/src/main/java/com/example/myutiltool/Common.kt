@@ -3,9 +3,11 @@ package com.example.myutiltool
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.core.net.toFile
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
@@ -13,10 +15,16 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.nio.charset.Charset
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import kotlin.io.path.Path
 
 class Common {
     val FLAG_READFILE = 1
@@ -72,14 +80,19 @@ class Common {
 
         return filename
     }
+
     @SuppressLint("Range")
-    fun getFilePath(context: Context, uri: Uri?): String? {
-        var filePath: String? = null
+    fun getFilePath(context: Context, uri: Uri): String {
+        var filePath: String = ""
 
         try {
-            context.contentResolver.query(uri!!, arrayOf(MediaStore.MediaColumns.DOCUMENT_ID), null, null, null)?.use {
+            context.contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DOCUMENT_ID), null, null, null)?.use {
                 if (it.moveToFirst()) {
-                    filePath = Environment.getExternalStorageDirectory().path.plus("/") + it.getString(it.getColumnIndex(MediaStore.MediaColumns.DOCUMENT_ID)).split(":")[1]
+                    val storageName = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DOCUMENT_ID)).split(":")[0]
+                    val docID = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DOCUMENT_ID)).split(":")[1]
+
+                    filePath = if (storageName == "primary") Environment.getExternalStorageDirectory().absolutePath else Environment.getStorageDirectory().absolutePath
+                    filePath += File.separator + docID
                 }
             }
         } catch (e: Exception) {
@@ -100,21 +113,30 @@ class Common {
     }
 
     fun unZip(context: Context, uri: Uri) {
+        val targetPath = getFilePath(context, uri)
+        val targetFile = File(targetPath)
+        val unZipDir = targetPath.substring(0, targetPath.length - 4)
+
+        File(unZipDir).let {
+            if(!it.exists()) it.mkdir()
+        }
+
         try {
-            ZipInputStream(FileInputStream(getFilePath(context, uri))).use { zis ->
-                var len = 0
-                var buff = ByteArray(1024)
+            ZipFile(targetFile, Charset.forName("MS932")).use { zip ->
+                zip.entries().asSequence().forEach { entry ->
+                    val entryPath = unZipDir + File.separator + entry.name
 
-                while(true) {
-                    val ze = zis.nextEntry ?: break
-                    val unZipFile = File(ze.name)
-
-                    if(unZipFile.isDirectory) {
-                        unZipFile.mkdirs()
+                    if(entry.isDirectory) {
+                        File(entryPath).mkdirs()
                     } else {
-                        BufferedOutputStream(FileOutputStream(unZipFile)).use { bos ->
-                            while(run {len = zis.read(buff); len} != -1) {
-                                bos.write(buff, 0, len)
+                        zip.getInputStream(entry).use { input ->
+                            var len = 0
+                            var buff = ByteArray(4096)
+
+                            BufferedOutputStream(FileOutputStream(entryPath)).use { bos ->
+                                while(run {len = input.read(buff); len} != -1) {
+                                    bos.write(buff, 0, len)
+                                }
                             }
                         }
                     }
