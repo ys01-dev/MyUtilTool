@@ -3,9 +3,11 @@ package com.example.myutiltool.ui
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
+import android.widget.EditText
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.fragment.app.DialogFragment
 
-class SimpleDialog constructor(title: String, message: String): DialogFragment() {
+class PasswordInputDialog constructor(title: String, message: String): DialogFragment() {
     private var _title = title
     private var _message = message
 
@@ -17,4 +19,5 @@ class SimpleDialog constructor(title: String, message: String): DialogFragment()
             }
         return builder.create()
     }
+
 }

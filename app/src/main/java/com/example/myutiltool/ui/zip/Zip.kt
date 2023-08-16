@@ -1,7 +1,9 @@
 package com.example.myutiltool.ui.zip
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
@@ -16,9 +18,12 @@ import com.example.myutiltool.Common
 import com.example.myutiltool.FileInfo
 import com.example.myutiltool.MainActivity
 import com.example.myutiltool.R
+import com.example.myutiltool.ui.PasswordInputDialog
 import com.example.myutiltool.ui.StoragePermissionDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import net.lingala.zip4j.ZipFile
+import java.io.File
 import java.lang.Exception
 
 class Zip : Fragment() {
@@ -59,10 +64,10 @@ class Zip : Fragment() {
                 try {
                     _common.unZip(_main, FileInfo.selectedFile!!)
                 } catch(e: Exception) {
-                    Snackbar.make(_main.findViewById(R.id.btn_unzip),"failed to open ZIP file", BaseTransientBottomBar.LENGTH_SHORT).show()
+                    Snackbar.make(_main.findViewById(R.id.btn_unzip), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
             } else {
-                Snackbar.make(_main.findViewById(R.id.btn_unzip),"you must select a zip file", BaseTransientBottomBar.LENGTH_SHORT).show()
+                Snackbar.make(_main.findViewById(R.id.btn_unzip),"only zip file is available", BaseTransientBottomBar.LENGTH_SHORT).show()
             }
         }
     }
