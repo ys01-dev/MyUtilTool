@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                 _common.FLAG_SELECTZIP -> {
                     FileInfo.selectedFile = data?.data
                     FileInfo.selectedFileName = _common.getFileName(this, data?.data)
-                    findViewById<TextView>(R.id.zipName).text = FileInfo.selectedFileName
+                    findViewById<TextView>(R.id.zipName).text = _common.getFilePath(this, data?.data!!)
                 }
                 else -> {
                     super.onActivityResult(requestCode, resultCode, data)

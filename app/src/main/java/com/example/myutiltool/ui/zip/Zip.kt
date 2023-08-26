@@ -1,8 +1,5 @@
 package com.example.myutiltool.ui.zip
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -11,20 +8,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myutiltool.Common
 import com.example.myutiltool.FileInfo
 import com.example.myutiltool.MainActivity
 import com.example.myutiltool.R
-import com.example.myutiltool.ui.PasswordInputDialog
 import com.example.myutiltool.ui.StoragePermissionDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.io.inputstream.ZipInputStream
+import net.lingala.zip4j.model.LocalFileHeader
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.lang.Exception
+import java.nio.charset.Charset
 
 class Zip : Fragment() {
     private lateinit var _common: Common
@@ -56,13 +58,13 @@ class Zip : Fragment() {
 
         view.findViewById<Button>(R.id.btn_unzip)?.setOnClickListener {
             if(!Environment.isExternalStorageManager()){
-                StoragePermissionDialog("storage permission required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(_main.supportFragmentManager,"main")
+                StoragePermissionDialog("storage permission is required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(_main.supportFragmentManager,"main")
                 return@setOnClickListener
             }
 
             if (_common.getFileExt(FileInfo.selectedFileName) == ".zip") {
                 try {
-                    _common.unZip(_main, FileInfo.selectedFile!!)
+                    unZip(FileInfo.selectedFile!!)
                 } catch(e: Exception) {
                     Snackbar.make(_main.findViewById(R.id.btn_unzip), e.message.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
@@ -71,4 +73,89 @@ class Zip : Fragment() {
             }
         }
     }
+
+    private fun unZip(uri: Uri) {
+        val targetPath = _common.getFilePath(_main, uri)
+        val targetFile = File(targetPath)
+        val unZipDir = targetPath.substring(0, targetPath.length - 4)
+
+        File(unZipDir).let {
+            if(!it.exists()) it.mkdir()
+        }
+
+        try {
+            ZipFile(targetFile).use { zip ->
+                if(zip.isEncrypted && _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility == TextInputLayout.INVISIBLE) {
+                    _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility = TextInputLayout.VISIBLE
+                    Snackbar.make(_main.findViewById(R.id.btn_unzip),"encrypted zip was selected. password is required", BaseTransientBottomBar.LENGTH_SHORT).show()
+                    return
+                }
+            }
+        } catch(e: Exception) {
+            throw Exception(e.message)
+        }
+
+        try {
+            ZipInputStream(FileInputStream(targetFile), _main.findViewById<TextInputEditText>(R.id.edit_Password).text.toString().toCharArray(), Charset.forName("MS932")).use { zis ->
+                var entry : LocalFileHeader?
+                var len = 0
+                var buff = ByteArray(4096)
+
+                while (run {entry = zis.nextEntry; entry} != null) {
+                    val newEntryPath = unZipDir + File.separator + entry!!.fileName
+
+                    if(entry!!.isDirectory) {
+                        File(newEntryPath).mkdirs()
+                    } else {
+                        FileOutputStream(File(newEntryPath)).use { fos ->
+                            while (run { len = zis.read(buff); len } != -1) {
+                                fos.write(buff, 0, len)
+                            }
+                        }
+                    }
+                }
+
+                _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility = TextInputLayout.INVISIBLE
+                Snackbar.make(_main.findViewById(R.id.btn_unzip),"successfully extracted", BaseTransientBottomBar.LENGTH_SHORT).show()
+            }
+        } catch(e: Exception) {
+            throw Exception(e.message)
+        }
+    }
+
+
+    /*    private fun unZip2(uri: Uri) {
+            val targetPath = _common.getFilePath(_main, uri)
+            val targetFile = File(targetPath)
+            val unZipDir = targetPath.substring(0, targetPath.length - 4)
+
+            File(unZipDir).let {
+                if(!it.exists()) it.mkdir()
+            }
+
+            try {
+                java.util.zip.ZipFile(targetFile, Charset.forName("MS932")).use { zip ->
+                    zip.entries().asSequence().forEach { entry ->
+                        val newEntryPath = unZipDir + File.separator + entry.name
+
+                        if(entry.isDirectory) {
+                            File(newEntryPath).mkdirs()
+                        } else {
+                            zip.getInputStream(entry).use { input ->
+                                var len = 0
+                                var buff = ByteArray(4096)
+
+                                BufferedOutputStream(FileOutputStream(newEntryPath)).use { bos ->
+                                    while(run {len = input.read(buff); len} != -1) {
+                                        bos.write(buff, 0, len)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(e: Exception) {
+                throw Exception(e.message)
+            }
+        }*/
 }
