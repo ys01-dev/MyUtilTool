@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myutiltool.Common
 import com.example.myutiltool.FileInfo
 import com.example.myutiltool.MainActivity
 import com.example.myutiltool.R
+import com.example.myutiltool.ui.RadiobuttonDialog
 import com.example.myutiltool.ui.StoragePermissionDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -51,6 +54,17 @@ class Zip : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if(MainActivity.topMenu != null) {
+            MainActivity.topMenu!!.findItem(R.id.menu_action_open)!!.isEnabled = false
+            MainActivity.topMenu!!.findItem(R.id.menu_action_overwrite)!!.isEnabled = false
+            MainActivity.topMenu!!.findItem(R.id.menu_action_save)!!.isEnabled = false
+        }
+
+        view.findViewById<TextView>(R.id.zipName).text = FileInfo.selectedFilePath
+
+        view.findViewById<Button>(R.id.btn_charCode).setOnClickListener {
+            RadiobuttonDialog(_main,"select charCode", arrayOf("MS932", "UTF8")).show(_main.supportFragmentManager,"main")
+        }
 
         view.findViewById<Button>(R.id.btn_selectZip)?.setOnClickListener {
             _main.browse(_common.FLAG_SELECTZIP)
@@ -62,7 +76,7 @@ class Zip : Fragment() {
                 return@setOnClickListener
             }
 
-            if (_common.getFileExt(FileInfo.selectedFileName) == ".zip") {
+            if (FileInfo.selectedFileExt == ".zip") {
                 try {
                     unZip(FileInfo.selectedFile!!)
                 } catch(e: Exception) {
@@ -83,21 +97,19 @@ class Zip : Fragment() {
             if(!it.exists()) it.mkdir()
         }
 
-        try {
-            ZipFile(targetFile).use { zip ->
-                if(zip.isEncrypted && _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility == TextInputLayout.INVISIBLE) {
-                    _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility = TextInputLayout.VISIBLE
-                    Snackbar.make(_main.findViewById(R.id.btn_unzip),"encrypted zip was selected. password is required", BaseTransientBottomBar.LENGTH_SHORT).show()
-                    return
-                }
+        ZipFile(targetFile).use { zip ->
+            if(zip.isEncrypted && _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility == TextInputLayout.INVISIBLE) {
+                _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility = TextInputLayout.VISIBLE
+                Snackbar.make(_main.findViewById(R.id.btn_unzip),"encrypted zip was selected. password is required", BaseTransientBottomBar.LENGTH_SHORT).show()
+                return
             }
-        } catch(e: Exception) {
-            throw Exception(e.message)
         }
 
         try {
-            ZipInputStream(FileInputStream(targetFile), _main.findViewById<TextInputEditText>(R.id.edit_Password).text.toString().toCharArray(), Charset.forName("MS932")).use { zis ->
-                var entry : LocalFileHeader?
+            ZipInputStream(FileInputStream(targetFile)
+                           , _main.findViewById<TextInputEditText>(R.id.edit_Password).text.toString().toCharArray()
+                           , Charset.forName(_main.findViewById<Button>(R.id.btn_charCode).text.toString())).use { zis ->
+                var entry: LocalFileHeader?
                 var len = 0
                 var buff = ByteArray(4096)
 
@@ -114,7 +126,7 @@ class Zip : Fragment() {
                         }
                     }
                 }
-
+                _main.findViewById<TextInputEditText>(R.id.edit_Password).setText("")
                 _main.findViewById<TextInputLayout>(R.id.layout_edit_Password).visibility = TextInputLayout.INVISIBLE
                 Snackbar.make(_main.findViewById(R.id.btn_unzip),"successfully extracted", BaseTransientBottomBar.LENGTH_SHORT).show()
             }

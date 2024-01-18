@@ -2,9 +2,11 @@ package com.example.myutiltool
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.Menu
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
@@ -18,6 +20,13 @@ class Common {
     val FLAG_SELECTZIP = 4
 
     val REQUEST_CODE_EXSTORAGE = 101
+
+    fun setFileData(context: Context, intent: Intent?) {
+        FileInfo.selectedFile = intent?.data
+        FileInfo.selectedFileName = this.getFileName(context, intent?.data)
+        FileInfo.selectedFilePath = this.getFilePath(context, intent?.data!!)
+        FileInfo.selectedFileExt = FileInfo.selectedFileName?.substring(FileInfo.selectedFileName!!.indexOf("."))
+    }
 
     fun readFile(context: Context, uri: Uri?): String? {
         var retStr: String? = null
@@ -43,10 +52,6 @@ class Common {
         } catch (e: Exception) {
             throw Exception(e.message)
         }
-    }
-
-    fun getFileExt(fileName: String?): String? {
-        return fileName?.substring(fileName.indexOf("."))
     }
 
     @SuppressLint("Range")

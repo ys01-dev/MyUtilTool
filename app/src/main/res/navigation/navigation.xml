@@ -8,13 +8,13 @@
     <fragment
         android:id="@+id/memo"
         android:name="com.example.myutiltool.ui.memo.Memo"
-        android:label="fragment_memo"
+        android:label="memo"
         tools:layout="@layout/fragment_memo" >
     </fragment>
     <fragment
         android:id="@+id/zip"
         android:name="com.example.myutiltool.ui.zip.Zip"
-        android:label="fragment_zip"
+        android:label="zip tool"
         tools:layout="@layout/fragment_zip" >
     </fragment>
 </navigation>

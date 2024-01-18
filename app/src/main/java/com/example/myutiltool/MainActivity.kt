@@ -1,6 +1,5 @@
 package com.example.myutiltool
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -12,7 +11,6 @@ import android.view.MenuItem
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
@@ -25,29 +23,50 @@ class MainActivity : AppCompatActivity() {
     private lateinit var _binding: ActivityMainBinding
     private lateinit var _common: Common
 
+    companion object {
+        var topMenu: Menu? = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _common = Common()
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
-
-        if(!Environment.isExternalStorageManager()){
-            StoragePermissionDialog("storage permission required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(supportFragmentManager,"main")
-        }
-
-        //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
-        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
-
         val navController = findNavController(R.id.nav_host_fragment_container)
 
         NavigationUI.setupActionBarWithNavController(this, navController, findViewById(R.id.drawerLayout))
         _binding.navView.setupWithNavController(navController)
+
+        if(!Environment.isExternalStorageManager()){
+            StoragePermissionDialog("storage permission required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(supportFragmentManager,"main")
+        } else {
+            if(intent?.data != null) {
+                _common.setFileData(this, intent)
+
+                if(FileInfo.selectedFileExt == ".zip") {
+                    navController.navigate(R.id.zip)
+                } else {
+                    val str = try {
+                        findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, intent?.data))
+                        this.supportActionBar?.title = FileInfo.selectedFileName
+                        "opened ${FileInfo.selectedFileName}"
+                    } catch (e: Exception) {
+                        e.message.toString()
+                    }
+                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
+                }
+            }
+        }
+        supportActionBar?.title = if(FileInfo.selectedFileName == null) "new text" else FileInfo.selectedFileName
+        //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
+        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
         //supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_top, menu)
+        MainActivity.topMenu = menu
         return true
     }
 
@@ -86,10 +105,10 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 _common.FLAG_READFILE -> {
-                    FileInfo.selectedFile = data?.data
-                    FileInfo.selectedFileName = _common.getFileName(this, data?.data)
+                    _common.setFileData(this, data)
                     var str = try {
                         findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, data?.data))
+                        this.supportActionBar?.title = FileInfo.selectedFileName
                         "opened ${FileInfo.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
@@ -106,10 +125,10 @@ class MainActivity : AppCompatActivity() {
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 _common.FLAG_SELECTZIP -> {
-                    FileInfo.selectedFile = data?.data
-                    FileInfo.selectedFileName = _common.getFileName(this, data?.data)
+                    _common.setFileData(this, data)
                     findViewById<TextView>(R.id.zipName).text = _common.getFilePath(this, data?.data!!)
                 }
+
                 else -> {
                     super.onActivityResult(requestCode, resultCode, data)
                 }
@@ -132,19 +151,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-     fun browse(mode: Int) {
+    fun browse(mode: Int) {
         var intent: Intent? = null
 
-        when(mode) {
+        when (mode) {
             _common.FLAG_READFILE,
             _common.FLAG_SELECTZIP -> {
                 intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = if(mode == _common.FLAG_SELECTZIP) "application/zip" else "*/*"
+                    type = if (mode == _common.FLAG_SELECTZIP) "application/zip" else "*/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                 }
             }
             _common.FLAG_WRITEFILE -> {
-                intent =  Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     type = "*/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_TITLE, FileInfo.selectedFileName ?: "newText.txt")
@@ -152,6 +171,6 @@ class MainActivity : AppCompatActivity() {
             }
             else -> {}
         }
-        if(intent != null) startActivityForResult(intent, mode, null)
+        if (intent != null) startActivityForResult(intent, mode, null)
     }
 }

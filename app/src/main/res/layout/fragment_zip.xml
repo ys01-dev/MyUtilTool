@@ -6,17 +6,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.zip.Zip">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="zip" />
-
     <Button
         android:id="@+id/btn_unzip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="250dp"
+        android:layout_marginTop="400dp"
         android:text="unZip" />
 
     <Button
@@ -24,15 +19,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="200dp"
         android:text="select a file" />
+
+    <Button
+        android:id="@+id/btn_charCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="250dp"
+        android:text="MS932" />
 
     <TextView
         android:id="@+id/zipName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="150dp"
         android:text="select a file first"
         android:textSize="20sp" />
 
@@ -41,7 +44,7 @@
         android:layout_width="300sp"
         android:layout_height="50sp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="170dp"
+        android:layout_marginTop="330dp"
         app:passwordToggleEnabled="true"
         android:visibility="invisible">
 
@@ -54,13 +57,4 @@
             android:hint="enter the password here"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/edit1"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="320dp"
-        android:textSize="20sp"
-        >
-    </EditText>
 </FrameLayout>
