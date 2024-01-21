@@ -1,12 +1,8 @@
 package com.example.myutiltool
 
-import android.net.Uri
+import android.content.Context
+import android.content.Intent
 
-class FileInfo {
-    companion object {
-        var selectedFile: Uri? = null
-        var selectedFileName: String? = null
-        var selectedFilePath: String? = null
-        var selectedFileExt: String? = null
-    }
+interface iFileInfo {
+    fun setFileData(context: Context, intent: Intent?)
 }

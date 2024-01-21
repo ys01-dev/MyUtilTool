@@ -16,12 +16,16 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.example.myutiltool.databinding.ActivityMainBinding
 import com.example.myutiltool.ui.StoragePermissionDialog
+import com.example.myutiltool.ui.memo.MemoViewModel
+import com.example.myutiltool.ui.zip.ZipViewModel
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var _binding: ActivityMainBinding
     private lateinit var _common: Common
+    private lateinit var _vmZip: ZipViewModel
+    private lateinit var _vmMemo: MemoViewModel
 
     companion object {
         var topMenu: Menu? = null
@@ -30,34 +34,35 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _common = Common()
+        _vmZip = ZipViewModel(this, _common)
+        _vmMemo = MemoViewModel(_common)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(_binding.root)
-        val navController = findNavController(R.id.nav_host_fragment_container)
 
+        val navController = findNavController(R.id.nav_host_fragment_container)
         NavigationUI.setupActionBarWithNavController(this, navController, findViewById(R.id.drawerLayout))
         _binding.navView.setupWithNavController(navController)
 
-        if(!Environment.isExternalStorageManager()){
+        if(!Environment.isExternalStorageManager()) {
             StoragePermissionDialog("storage permission required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(supportFragmentManager,"main")
         } else {
             if(intent?.data != null) {
-                _common.setFileData(this, intent)
+                _vmZip.setFileData(this, intent)
 
-                if(FileInfo.selectedFileExt == ".zip") {
+                if(ZipViewModel.selectedFileExt == ".zip") {
                     navController.navigate(R.id.zip)
                 } else {
-                    val str = try {
+                    val message = try {
                         findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, intent?.data))
-                        this.supportActionBar?.title = FileInfo.selectedFileName
-                        "opened ${FileInfo.selectedFileName}"
+                        this.supportActionBar?.title = ZipViewModel.selectedFileName
+                        "opened ${ZipViewModel.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
-                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
+                    Snackbar.make(findViewById(R.id.EditText1), message, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
             }
         }
-        supportActionBar?.title = if(FileInfo.selectedFileName == null) "new text" else FileInfo.selectedFileName
         //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
         //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
         //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
@@ -78,23 +83,25 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_action_save -> {
-                this.browse(_common.FLAG_WRITEFILE)
+                _common.browse(this, _common.FLAG_WRITEFILE)
             }
             R.id.menu_action_open -> {
-                this.browse(_common.FLAG_READFILE)
+                _common.browse(this, _common.FLAG_READFILE)
             }
             R.id.menu_action_overwrite -> {
-                if(FileInfo.selectedFile != null){
-                    var str = try {
-                        _common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), FileInfo.selectedFile)
-                        "overwritten ${FileInfo.selectedFileName}"
+                var message = ""
+                if(MemoViewModel.selectedFile != null) {
+                    message = try {
+                        MemoViewModel.selectedFileName = _common.getFileName(this, MemoViewModel.selectedFile)
+                        _common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), MemoViewModel.selectedFile)
+                        "overwritten ${MemoViewModel.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
-                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 } else {
-                    Snackbar.make(findViewById(R.id.EditText1), "any file hasn't been opened yet", BaseTransientBottomBar.LENGTH_SHORT).show()
+                    message = "any file hasn't been opened yet"
                 }
+                Snackbar.make(findViewById(R.id.EditText1), message, BaseTransientBottomBar.LENGTH_SHORT).show()
             }
             else -> {}
         }
@@ -105,30 +112,30 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 _common.FLAG_READFILE -> {
-                    _common.setFileData(this, data)
-                    var str = try {
+                    _vmMemo.setFileData(this, data)
+                    val str = try {
                         findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, data?.data))
-                        this.supportActionBar?.title = FileInfo.selectedFileName
-                        "opened ${FileInfo.selectedFileName}"
+                        this.supportActionBar?.title = MemoViewModel.selectedFileName
+                        "opened ${MemoViewModel.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 _common.FLAG_WRITEFILE -> {
-                    var str = try {
+                    val str = try {
                         _common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
-                        "file saved as ${FileInfo.selectedFileName}"
+                        this.supportActionBar?.title = MemoViewModel.selectedFileName
+                        "file saved as ${MemoViewModel.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
                     Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 _common.FLAG_SELECTZIP -> {
-                    _common.setFileData(this, data)
+                    _vmZip.setFileData(this, data)
                     findViewById<TextView>(R.id.zipName).text = _common.getFilePath(this, data?.data!!)
                 }
-
                 else -> {
                     super.onActivityResult(requestCode, resultCode, data)
                 }
@@ -136,41 +143,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        when(requestCode) {
-            _common.REQUEST_CODE_EXSTORAGE -> {
-                if(grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
-
-                } else {
-                    Snackbar.make(findViewById(R.id.EditText1), "permission of ex-storage didn't granted", BaseTransientBottomBar.LENGTH_SHORT).show()
-                }
-            }
-            else -> {}
-        }
-    }
-
-    fun browse(mode: Int) {
-        var intent: Intent? = null
-
-        when (mode) {
-            _common.FLAG_READFILE,
-            _common.FLAG_SELECTZIP -> {
-                intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = if (mode == _common.FLAG_SELECTZIP) "application/zip" else "*/*"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                }
-            }
-            _common.FLAG_WRITEFILE -> {
-                intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    type = "*/*"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    putExtra(Intent.EXTRA_TITLE, FileInfo.selectedFileName ?: "newText.txt")
-                }
-            }
-            else -> {}
-        }
-        if (intent != null) startActivityForResult(intent, mode, null)
-    }
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+//        when(requestCode) {
+//            _common.REQUEST_CODE_EXSTORAGE -> {
+//                if(grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
+//
+//                } else {
+//                    Snackbar.make(findViewById(R.id.EditText1), "permission of ex-storage didn't granted", BaseTransientBottomBar.LENGTH_SHORT).show()
+//                }
+//            }
+//            else -> {}
+//        }
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//    }
 }

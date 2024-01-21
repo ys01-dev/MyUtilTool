@@ -6,7 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.view.Menu
+import com.example.myutiltool.ui.memo.MemoViewModel
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
@@ -18,15 +18,7 @@ class Common {
     val FLAG_WRITEFILE = 2
     val FLAG_UNZIP = 3
     val FLAG_SELECTZIP = 4
-
     val REQUEST_CODE_EXSTORAGE = 101
-
-    fun setFileData(context: Context, intent: Intent?) {
-        FileInfo.selectedFile = intent?.data
-        FileInfo.selectedFileName = this.getFileName(context, intent?.data)
-        FileInfo.selectedFilePath = this.getFilePath(context, intent?.data!!)
-        FileInfo.selectedFileExt = FileInfo.selectedFileName?.substring(FileInfo.selectedFileName!!.indexOf("."))
-    }
 
     fun readFile(context: Context, uri: Uri?): String? {
         var retStr: String? = null
@@ -43,8 +35,6 @@ class Common {
     }
 
     fun writeFile(context: Context, str: String?, uri: Uri?) {
-        FileInfo.selectedFileName = this.getFileName(context, uri)
-
         try {
             BufferedWriter(OutputStreamWriter(context.contentResolver.openOutputStream(uri!!))).use {
                 it.write(str)
@@ -90,5 +80,28 @@ class Common {
         }
 
         return filePath
+    }
+
+    fun browse(activity: MainActivity, mode: Int) {
+        var intent: Intent? = null
+
+        when (mode) {
+            FLAG_READFILE,
+            FLAG_SELECTZIP -> {
+                intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    type = if (mode == FLAG_SELECTZIP) "application/zip" else "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+            }
+            FLAG_WRITEFILE -> {
+                intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    type = "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    putExtra(Intent.EXTRA_TITLE, MemoViewModel.selectedFileName ?: "newText.txt")
+                }
+            }
+            else -> {}
+        }
+        if (intent != null) activity.startActivityForResult(intent, mode, null)
     }
 }
