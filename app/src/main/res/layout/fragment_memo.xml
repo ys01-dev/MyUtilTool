@@ -5,16 +5,27 @@
     android:layout_height="match_parent"
     tools:context=".ui.memo.Memo">
 
-
-    <EditText
-        android:id="@+id/EditText1"
+    <ScrollView
+        android:id="@+id/scrollViewMemo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:ems="10"
-        android:inputType="textMultiLine"
-        android:hint="input words..."
-        android:background="#00000000"
-        android:gravity="top"
-        />
+        android:fillViewport="true"
+        >
 
+        <EditText
+            android:id="@+id/EditText1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="top"
+            android:hint="enter text here"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            android:background="@null"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            />
+    </ScrollView>
 </FrameLayout>

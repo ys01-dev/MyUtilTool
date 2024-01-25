@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.myutiltool.MainActivity
 import com.example.myutiltool.R
 
-class RadiobuttonDialog constructor(context: MainActivity, title: String, items: Array<String>): DialogFragment() {
+class RadiobuttonDialog(context: MainActivity, title: String, items: Array<String>): DialogFragment() {
     private var _title = title
     private var _items = items
     private var _main = context

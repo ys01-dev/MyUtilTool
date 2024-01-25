@@ -20,6 +20,13 @@ class Common {
     val FLAG_SELECTZIP = 4
     val REQUEST_CODE_EXSTORAGE = 101
 
+//    companion object {
+//        var screenH: Int = 0
+//        var screenW: Int = 0
+//        var effectiveH: Int = 0
+//        var effectiveW: Int = 0
+//    }
+
     fun readFile(context: Context, uri: Uri?): String? {
         var retStr: String? = null
 
@@ -57,16 +64,15 @@ class Common {
         } catch (e: Exception) {
             throw Exception(e.message)
         }
-
         return filename
     }
 
     @SuppressLint("Range")
-    fun getFilePath(context: Context, uri: Uri): String {
-        var filePath: String = ""
+    fun getFilePath(context: Context, uri: Uri?): String? {
+        var filePath: String? = null
 
         try {
-            context.contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DOCUMENT_ID), null, null, null)?.use {
+            context.contentResolver.query(uri!!, arrayOf(MediaStore.MediaColumns.DOCUMENT_ID), null, null, null)?.use {
                 if (it.moveToFirst()) {
                     val storageName = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DOCUMENT_ID)).split(":")[0]
                     val docID = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DOCUMENT_ID)).split(":")[1]
@@ -78,8 +84,13 @@ class Common {
         } catch (e: Exception) {
             throw Exception(e.message)
         }
-
         return filePath
+    }
+
+    fun getFileExt(context: Context, uri: Uri?): String? {
+         return this.getFileName(context, uri)?.let {
+            it.substring(it.indexOf("."))
+        }
     }
 
     fun browse(activity: MainActivity, mode: Int) {
@@ -104,4 +115,12 @@ class Common {
         }
         if (intent != null) activity.startActivityForResult(intent, mode, null)
     }
+
+//    fun setMetrics(metrics: WindowMetrics) {
+//        val insets = metrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+//        Common.screenH = metrics.bounds.height()
+//        Common.screenW = metrics.bounds.width()
+//        Common.effectiveH = screenH - insets.top - insets.bottom
+//        Common.effectiveW = screenW - insets.left - insets.right
+//    }
 }

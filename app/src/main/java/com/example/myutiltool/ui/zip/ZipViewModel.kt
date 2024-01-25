@@ -1,7 +1,6 @@
 package com.example.myutiltool.ui.zip
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -30,11 +29,11 @@ class ZipViewModel(private val _main: MainActivity, private val _common: Common 
         }
     }
 
-    override fun setFileData(context: Context, intent: Intent?) {
-        ZipViewModel.selectedFile = intent?.data
-        ZipViewModel.selectedFileName = _common.getFileName(context, intent?.data)
-        ZipViewModel.selectedFilePath = _common.getFilePath(context, intent?.data!!)
-        ZipViewModel.selectedFileExt = ZipViewModel.selectedFileName?.substring(ZipViewModel.selectedFileName!!.indexOf("."))
+    override fun setFileData(context: Context, uri: Uri?) {
+        ZipViewModel.selectedFile = uri
+        ZipViewModel.selectedFileName = _common.getFileName(context, uri)
+        ZipViewModel.selectedFilePath = _common.getFilePath(context, uri)
+        ZipViewModel.selectedFileExt = _common.getFileExt(context, uri)
     }
 
     fun unZip(password: String, charSet: Charset) {

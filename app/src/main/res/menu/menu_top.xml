@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/menu_action_open"
-        android:title="open"
-        app:showAsAction="never"
-        />
-    <item
-        android:id="@+id/menu_action_save"
-        android:title="save"
-        app:showAsAction="never"
-        />
-    <item
-        android:id="@+id/menu_action_overwrite"
-        android:title="overwrite"
-        app:showAsAction="never"
-        />
-
+    <group android:id="@+id/menu_group">
+        <item
+            android:id="@+id/menu_action_open"
+            android:title="open"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_action_save"
+            android:title="save"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_action_overwrite"
+            android:title="overwrite"
+            app:showAsAction="never" />
+    </group>
 </menu>

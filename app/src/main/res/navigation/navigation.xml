@@ -10,11 +10,17 @@
         android:name="com.example.myutiltool.ui.memo.Memo"
         android:label="memo"
         tools:layout="@layout/fragment_memo" >
+        <action
+            android:id="@+id/action_memo_to_zip"
+            app:destination="@id/zip" />
     </fragment>
     <fragment
         android:id="@+id/zip"
         android:name="com.example.myutiltool.ui.zip.Zip"
         android:label="zip tool"
         tools:layout="@layout/fragment_zip" >
+        <action
+            android:id="@+id/action_zip_to_memo"
+            app:destination="@id/memo" />
     </fragment>
 </navigation>

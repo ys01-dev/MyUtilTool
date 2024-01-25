@@ -1,7 +1,6 @@
 package com.example.myutiltool.ui.memo
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.example.myutiltool.Common
@@ -16,10 +15,10 @@ class MemoViewModel(private val _common: Common = Common()) : ViewModel(), iFile
         var selectedFileExt: String? = null
     }
 
-    override fun setFileData(context: Context, intent: Intent?) {
-        MemoViewModel.selectedFile = intent?.data
-        MemoViewModel.selectedFileName = _common.getFileName(context, intent?.data)
-        MemoViewModel.selectedFilePath = _common.getFilePath(context, intent?.data!!)
-        MemoViewModel.selectedFileExt = MemoViewModel.selectedFileName?.substring(MemoViewModel.selectedFileName!!.indexOf("."))
+    override fun setFileData(context: Context, uri: Uri?) {
+        MemoViewModel.selectedFile = uri
+        MemoViewModel.selectedFileName = _common.getFileName(context, uri)
+        MemoViewModel.selectedFilePath = _common.getFilePath(context, uri)
+        MemoViewModel.selectedFileExt = _common.getFileExt(context, uri)
     }
 }

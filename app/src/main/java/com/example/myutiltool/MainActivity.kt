@@ -2,7 +2,6 @@ package com.example.myutiltool
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
@@ -47,26 +46,25 @@ class MainActivity : AppCompatActivity() {
             StoragePermissionDialog("storage permission required","Zip tool requires storage permission", Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).show(supportFragmentManager,"main")
         } else {
             if(intent?.data != null) {
-                _vmZip.setFileData(this, intent)
-
-                if(ZipViewModel.selectedFileExt == ".zip") {
-                    navController.navigate(R.id.zip)
+                if(_common.getFileExt(this, intent?.data) == ".zip") {
+                    _vmZip.setFileData(this, intent.data)
+                    findNavController(R.id.nav_host_fragment_container).navigate(R.id.zip)
                 } else {
+                    _vmMemo.setFileData(this, intent.data)
                     val message = try {
                         findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, intent?.data))
-                        this.supportActionBar?.title = ZipViewModel.selectedFileName
-                        "opened ${ZipViewModel.selectedFileName}"
+                        this.supportActionBar?.title = MemoViewModel.selectedFileName
+                        "opened ${MemoViewModel.selectedFileName}"
                     } catch (e: Exception) {
                         e.message.toString()
                     }
-                    Snackbar.make(findViewById(R.id.EditText1), message, BaseTransientBottomBar.LENGTH_SHORT).show()
+                    Snackbar.make(findViewById(R.id.drawerLayout), message, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
             }
         }
         //ActivityCompat.shouldShowRequestPermissionRationale(_main, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
         //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
         //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), _common.REQUEST_CODE_EXSTORAGE)
-        //supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -101,7 +99,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     message = "any file hasn't been opened yet"
                 }
-                Snackbar.make(findViewById(R.id.EditText1), message, BaseTransientBottomBar.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(R.id.drawerLayout), message, BaseTransientBottomBar.LENGTH_SHORT).show()
             }
             else -> {}
         }
@@ -112,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 _common.FLAG_READFILE -> {
-                    _vmMemo.setFileData(this, data)
+                    _vmMemo.setFileData(this, data?.data)
                     val str = try {
                         findViewById<EditText>(R.id.EditText1).setText(_common.readFile(this, data?.data))
                         this.supportActionBar?.title = MemoViewModel.selectedFileName
@@ -120,9 +118,10 @@ class MainActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         e.message.toString()
                     }
-                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
+                    Snackbar.make(findViewById(R.id.drawerLayout), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 _common.FLAG_WRITEFILE -> {
+                    _vmMemo.setFileData(this, data?.data)
                     val str = try {
                         _common.writeFile(this, findViewById<EditText>(R.id.EditText1).text.toString(), data?.data)
                         this.supportActionBar?.title = MemoViewModel.selectedFileName
@@ -130,10 +129,10 @@ class MainActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         e.message.toString()
                     }
-                    Snackbar.make(findViewById(R.id.EditText1), str, BaseTransientBottomBar.LENGTH_SHORT).show()
+                    Snackbar.make(findViewById(R.id.drawerLayout), str, BaseTransientBottomBar.LENGTH_SHORT).show()
                 }
                 _common.FLAG_SELECTZIP -> {
-                    _vmZip.setFileData(this, data)
+                    _vmZip.setFileData(this, data?.data)
                     findViewById<TextView>(R.id.zipName).text = _common.getFilePath(this, data?.data!!)
                 }
                 else -> {
@@ -145,11 +144,11 @@ class MainActivity : AppCompatActivity() {
 
 //    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 //        when(requestCode) {
-//            _common.REQUEST_CODE_EXSTORAGE -> {
-//                if(grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
+//            1 -> {
+//                if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 //
 //                } else {
-//                    Snackbar.make(findViewById(R.id.EditText1), "permission of ex-storage didn't granted", BaseTransientBottomBar.LENGTH_SHORT).show()
+//                    Snackbar.make(findViewById(R.id.drawerLayout), "permission denied", BaseTransientBottomBar.LENGTH_SHORT).show()
 //                }
 //            }
 //            else -> {}
